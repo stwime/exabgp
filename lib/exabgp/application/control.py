@@ -16,6 +16,7 @@ import select
 import socket
 import traceback
 from collections import deque
+from typing import Type
 
 from exabgp.util import str_ascii
 from exabgp.reactor.network.error import error
@@ -205,7 +206,10 @@ class Control(object):
 
         def consume(source):
             if not backlog[source] and b'\n' not in store[source]:
-                store[source] += read[source](1024)
+                try:
+                    store[source] += read[source](1024)
+                except TypeError:
+                    sys.stderr.write("TypeError in consume()")
             else:
                 backlog[source].append(read[source](1024))
                 # assuming a route takes 80 chars, 100 Mb is over 1Millions routes
